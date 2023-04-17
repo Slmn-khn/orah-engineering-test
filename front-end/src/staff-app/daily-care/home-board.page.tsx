@@ -14,7 +14,7 @@ export const HomeBoardPage: React.FC = () => {
   const [isRollMode, setIsRollMode] = useState(false)
   const [getStudents, data, loadState] = useApi<{ students: Person[] }>({ url: "get-homeboard-students" })
 
-  console.log('test')
+  console.log('test1')
 
   useEffect(() => {
     void getStudents()
