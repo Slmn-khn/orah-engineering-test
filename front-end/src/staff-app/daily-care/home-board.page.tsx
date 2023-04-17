@@ -220,6 +220,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
   const [sortByLastName, setSortByLastName] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
+  console.log('test')
   const handleSortChange = () => {
     setSortByLastName(!sortByLastName);
     onItemClick("sort", { sortOrder: sortDescending, sortByLastName: !sortByLastName })
