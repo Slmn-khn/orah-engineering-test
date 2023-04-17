@@ -3,6 +3,11 @@ export function add<T>(key: LocalStorageKey, value: T) {
   return value
 }
 
+export function remove<T>(key: LocalStorageKey) {
+  localStorage.removeItem(key)
+  return;
+}
+
 export function addIfNotExist<T>(key: LocalStorageKey, value: T) {
   const itemInStore = get<T>(key)
   // add to local storage if not exist
