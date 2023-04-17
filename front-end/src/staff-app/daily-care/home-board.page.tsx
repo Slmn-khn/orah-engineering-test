@@ -1,20 +1,12 @@
 import React, { useState, useEffect } from "react"
 import styled from "styled-components"
 import Button from "@material-ui/core/ButtonBase"
-import {
-  Toolbar as MUIToolBar,
-  Typography,
-  IconButton,
-  Tooltip,
-  Switch,
-  FormControlLabel,
-  TextField,
-} from "@material-ui/core";
+import { Toolbar as MUIToolBar, Typography, IconButton, Tooltip, Switch, FormControlLabel, TextField } from "@material-ui/core"
 import { remove, LocalStorageKey, get, add } from "shared/helpers/local-storage"
-import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import { makeStyles } from "@material-ui/core/styles";
-import SearchIcon from "@material-ui/icons/Search";
+import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp"
+import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown"
+import { makeStyles } from "@material-ui/core/styles"
+import SearchIcon from "@material-ui/icons/Search"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { Spacing, BorderRadius, FontWeight } from "shared/styles/styles"
 import { Colors } from "shared/styles/colors"
@@ -25,51 +17,77 @@ import { RolllStateType, RollInput } from "shared/models/roll"
 import { StudentListTile } from "staff-app/components/student-list-tile/student-list-tile.component"
 import { ActiveRollOverlay, ActiveRollAction } from "staff-app/components/active-roll-overlay/active-roll-overlay.component"
 
-
 const useStyles = makeStyles((theme) => ({
   root: {
-    paddingLeft: theme.spacing(1),
+    paddingLeft: "0",
+    paddingRight: "0",
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between",
+    [theme.breakpoints.down("xs")]: {
+      display: "block",
+      paddingBottom: "10px",
+    },
+  },
+  searchBlock: {
+    display: "flex",
+    justifyContent: "center",
   },
   sortContainer: {
-    display: 'flex',
-    alignItems: 'center'
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   fNametitle: {
-    margin: "0 10px 0 0"
+    margin: "0 10px 0 0",
   },
   LNametitle: {
-    margin: "0 0 0 -15px"
+    margin: "0 0 0 -15px",
+  },
+  sortIcon: {
+    color: "#fff",
   },
   textFieldRoot: {
     color: "#ffff",
-    border: 'solid 1px #ffff',
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': {
-        borderColor: '#ffff',
-      },
-      '&:hover fieldset': {
-        borderColor: '#ffff',
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: '#ffff',
-      },
+    border: "solid 1px #ffff",
+    "& .MuiSvgIcon-root": {
+      color: "#fff",
     },
-    "& .MuiFormLabel-root": {
-      "& Mui-focused": {
-        color: '#ffff !important'
-      },
-    }
   },
-}));
-
-
+  pageContainer: {
+    [theme.breakpoints.down("md")]: {
+      width: "94%",
+    },
+  },
+  switch_primary: {
+    "& .MuiSwitch-colorSecondary.Mui-checked": {
+      color: "#fff !important",
+    },
+    "& .MuiSwitch-track": {
+      backgroundColor: "#fff !important",
+    },
+  },
+  searchInput: {
+    "& label": {
+      color: "#fff",
+    },
+    "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "transparent",
+    },
+  },
+  rollBtn: {
+    marginLeft: "14px",
+  },
+}))
 
 export const HomeBoardPage: React.FC = () => {
   const [isRollMode, setIsRollMode] = useState(false)
   const [getStudents, data, loadState] = useApi<{ students: Person[] }>({ url: "get-homeboard-students" })
   const [saveActiveRoll] = useApi<RollInput>({ url: "save-roll" })
   const [filteredData, setFilteredData] = React.useState<{ students: Person[] }>()
-  const [rollStates, setRollStates] = useState<Record<"present" | "late" | "absent", number>>({ present: 0, late: 0, absent: 0 });
+  const [rollStates, setRollStates] = useState<Record<"present" | "late" | "absent", number>>({ present: 0, late: 0, absent: 0 })
+
+  const classes = useStyles()
 
   useEffect(() => {
     void getStudents()
@@ -80,98 +98,99 @@ export const HomeBoardPage: React.FC = () => {
     setRollStates(handleRollStateDetails(data?.students || []))
   }, [data])
 
-
   const onToolbarAction = (action: ToolbarAction, value?: any) => {
     switch (action) {
-      case 'roll':
-        setIsRollMode(true);
-        break;
-      case 'sort':
-        sortStudents(value.sortOrder, value.sortByLastName);
-        break;
-      case 'search':
+      case "roll":
+        setIsRollMode(true)
+        break
+      case "sort":
+        sortStudents(value.sortOrder, value.sortByLastName)
+        break
+      case "search":
         handleSearchChange(value.searchQuery)
-        break;
+        break
       default:
-        break;
+        break
     }
   }
 
   const onActiveRollAction = (action: ActiveRollAction, selectedType?: RolllStateType | string) => {
     switch (action) {
-      case 'exit':
-        setIsRollMode(false);
-        break;
+      case "exit":
+        setIsRollMode(false)
+        break
       case "complete":
         remove(LocalStorageKey.rolls)
-        let localDetails = filteredData?.students.filter((studentDetails: Person) => studentDetails.roll_state);
+        let localDetails = filteredData?.students.filter((studentDetails: Person) => studentDetails.roll_state)
         localDetails?.map((studentDetails: Person) => {
           saveActiveRoll({ student_roll_states: { student_id: studentDetails.id, roll_state: studentDetails.roll_state } })
-        });
-        setIsRollMode(false);
-        break;
-      case 'filter':
+        })
+        setIsRollMode(false)
+        break
+      case "filter":
         let TempFilter: Array<Person> = get(LocalStorageKey.students) || []
-        if (selectedType !== 'all') {
+        if (selectedType !== "all") {
           TempFilter = TempFilter.filter((studentDetails: Person) => studentDetails.roll_state === selectedType)
           setFilteredData({ students: TempFilter || [] })
         } else {
           setFilteredData({ students: TempFilter || [] })
         }
-        break;
+        break
       default:
-        break;
+        break
     }
   }
 
   const sortStudents = (isDescending: boolean, sortByLastName: boolean) => {
-    var compareResult: number;
-    const sortedStudents = filteredData && filteredData.students.sort((a: Person, b: Person) => {
-      let aValue: string;
-      let bValue: string;
-      if (!sortByLastName) {
-        aValue = a.first_name
-        bValue = b.first_name
-        compareResult = aValue.localeCompare(bValue);
-      } else {
-        aValue = a.last_name;
-        bValue = b.last_name;
-        compareResult = aValue.localeCompare(bValue);
-      }
-      return isDescending ? -compareResult : compareResult;
-    });
+    var compareResult: number
+    const sortedStudents =
+      filteredData &&
+      filteredData.students.sort((a: Person, b: Person) => {
+        let aValue: string
+        let bValue: string
+        if (!sortByLastName) {
+          aValue = a.first_name
+          bValue = b.first_name
+          compareResult = aValue.localeCompare(bValue)
+        } else {
+          aValue = a.last_name
+          bValue = b.last_name
+          compareResult = aValue.localeCompare(bValue)
+        }
+        return isDescending ? -compareResult : compareResult
+      })
     setFilteredData({ students: sortedStudents || [] })
-  };
+  }
 
   const handleSearchChange = (searchQuery: string) => {
-    const searchedStudents = filteredData && filteredData.students.filter((student: Person) => {
-      return `${student.first_name} ${student.last_name}`
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
-    });
-    searchQuery === 'empty' ? setFilteredData({ students: data?.students || [] }) : setFilteredData({ students: searchedStudents || [] })
-  };
+    const searchedStudents =
+      filteredData &&
+      filteredData.students.filter((student: Person) => {
+        return `${student.first_name} ${student.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())
+      })
+    searchQuery === "empty" ? setFilteredData({ students: data?.students || [] }) : setFilteredData({ students: searchedStudents || [] })
+  }
 
   const handleRollStateDetails = (studentsDetails: Array<Person>) => {
     let rollStateChange = studentsDetails.reduce((acc: any, student: Person) => {
-      const rollState = student?.roll_state;
+      const rollState = student?.roll_state
       if (rollState && rollState in acc) {
-        acc[rollState]++;
+        acc[rollState]++
       } else {
         //@ts-ignore
-        acc[rollState] = 1;
+        acc[rollState] = 1
       }
-      return acc;
-    }, {});
-    return rollStateChange;
+      return acc
+    }, {})
+    return rollStateChange
   }
 
   const handleRollState = (state: RolllStateType, studentID: number) => {
     if (isRollMode) {
       if (filteredData && filteredData?.students.length > 0) {
-        const obj = filteredData.students.find((item: Person) => item.id === studentID);
+        const obj = filteredData.students.find((item: Person) => item.id === studentID)
         if (obj) {
-          obj.roll_state = state;
+          obj.roll_state = state
         }
         setRollStates(handleRollStateDetails(filteredData.students))
       }
@@ -181,7 +200,7 @@ export const HomeBoardPage: React.FC = () => {
 
   return (
     <>
-      <S.PageContainer>
+      <S.PageContainer className={classes.pageContainer}>
         <Toolbar onItemClick={onToolbarAction} />
 
         {loadState === "loading" && (
@@ -213,27 +232,27 @@ type ToolbarAction = "roll" | "sort" | "search"
 interface ToolbarProps {
   onItemClick: (action: ToolbarAction, value?: any) => void
 }
-const Toolbar: React.FC<ToolbarProps> = (props) => {
-  const classes = useStyles();
+const Toolbar: React.FC<ToolbarProps> = (props: ToolbarProps) => {
+  const classes = useStyles()
   const { onItemClick } = props
-  const [sortDescending, setSortDescending] = useState(false);
-  const [sortByLastName, setSortByLastName] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
+  const [sortDescending, setSortDescending] = useState(false)
+  const [sortByLastName, setSortByLastName] = useState(false)
+  const [searchValue, setSearchValue] = useState("")
 
   const handleSortChange = () => {
-    setSortByLastName(!sortByLastName);
+    setSortByLastName(!sortByLastName)
     onItemClick("sort", { sortOrder: sortDescending, sortByLastName: !sortByLastName })
-  };
+  }
 
   const handleSortToggle = () => {
-    setSortDescending(!sortDescending);
+    setSortDescending(!sortDescending)
     onItemClick("sort", { sortOrder: !sortDescending, sortByLastName: sortByLastName })
-  };
+  }
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(event.target.value);
+    setSearchValue(event.target.value)
     onItemClick("search", { searchQuery: event.target.value || "empty" })
-  };
+  }
 
   return (
     <S.ToolbarContainer>
@@ -242,43 +261,44 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
           <Typography className={classes.fNametitle} variant="body2" id="tableTitle">
             First Name
           </Typography>
-          <FormControlLabel
-            label=''
-            control={<Switch checked={sortByLastName ? true : false} onChange={handleSortChange} />}
-          />
+          <FormControlLabel label="" control={<Switch className={classes.switch_primary} checked={sortByLastName ? true : false} onChange={handleSortChange} />} />
           <Typography className={classes.LNametitle} variant="body2" id="tableTitle">
             Last Name
           </Typography>
           <Tooltip title="Sort">
             <IconButton aria-label="Sort" onClick={handleSortToggle}>
-              {!sortDescending &&
-                <KeyboardArrowUpIcon color="secondary" />
-              }
-              {sortDescending &&
-                <KeyboardArrowDownIcon color="secondary" />
-              }
+              {!sortDescending && <KeyboardArrowUpIcon className={classes.sortIcon} />}
+              {sortDescending && <KeyboardArrowDownIcon className={classes.sortIcon} />}
             </IconButton>
           </Tooltip>
         </div>
-        <TextField
-          label="Search by Name"
-          style={{ color: 'red' }}
-          variant="outlined"
-          size="small"
-          value={searchValue}
-          onChange={handleSearchChange}
-          InputProps={{
-            className: classes.textFieldRoot,
-            endAdornment: (
-              <IconButton aria-label="search" edge="end">
-                <SearchIcon />
-              </IconButton>
-            ),
-          }}
-        />
+        <div className={classes.searchBlock}>
+          <div className={classes.searchInput}>
+            <TextField
+              label="Search by Name"
+              variant="outlined"
+              size="small"
+              value={searchValue}
+              onChange={handleSearchChange}
+              InputLabelProps={{
+                style: { color: "white", backgroundColor: "#3a415d" },
+              }}
+              InputProps={{
+                className: classes.textFieldRoot,
+                endAdornment: (
+                  <IconButton aria-label="search" edge="end">
+                    <SearchIcon />
+                  </IconButton>
+                ),
+              }}
+            />
+          </div>
+          <S.Button onClick={() => onItemClick("roll")} className={classes.rollBtn}>
+            Start Roll
+          </S.Button>
+        </div>
       </MUIToolBar>
-      <S.Button onClick={() => onItemClick("roll")}>Start Roll</S.Button>
-    </S.ToolbarContainer >
+    </S.ToolbarContainer>
   )
 }
 
@@ -294,7 +314,7 @@ const S = {
     justify-content: space-between;
     align-items: center;
     color: #fff;
-    background-color: ${Colors.blue.base};
+    background-color: ${Colors.blue.darker};
     padding: 6px 14px;
     font-weight: ${FontWeight.strong};
     border-radius: ${BorderRadius.default};
